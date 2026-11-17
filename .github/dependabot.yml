@@ -10,15 +10,40 @@ updates:
       prefix: chore
       include: scope
     labels: [dependencies]
+    # Grouped PRs carry only minor and patch updates, so one breaking release can no longer
+    # block a whole group (TypeScript 7 broke the install of the "build" group in #9).
     groups:
       react:
         patterns: ['react', 'react-dom', '@types/react*']
+        update-types: [minor, patch]
       lint-and-format:
         patterns: ['eslint*', '@eslint/*', 'typescript-eslint', 'prettier*', 'globals']
+        update-types: [minor, patch]
       testing:
-        patterns: ['vitest', 'jsdom', '@testing-library/*']
+        patterns: ['vitest', '@vitest/*', 'jsdom', '@testing-library/*']
+        update-types: [minor, patch]
       build:
         patterns: ['vite', '@vitejs/*', 'tailwindcss', 'postcss', 'autoprefixer', 'typescript']
+        update-types: [minor, patch]
+      # Vite, its React plugin and Vitest have to move to a new major together.
+      vite-major:
+        patterns: ['vite', '@vitejs/*', 'vitest', '@vitest/*']
+        update-types: [major]
+    ignore:
+      # These majors need a planned migration, not a version bump. Upgrade them by hand.
+      # TypeScript: wait until typescript-eslint's peer range includes the new major.
+      - dependency-name: 'typescript'
+        update-types: ['version-update:semver-major']
+      # Tailwind CSS 4 replaces the JS config and the PostCSS setup.
+      - dependency-name: 'tailwindcss'
+        update-types: ['version-update:semver-major']
+      # React 19 changes types and APIs used across the app.
+      - dependency-name: 'react'
+        update-types: ['version-update:semver-major']
+      - dependency-name: 'react-dom'
+        update-types: ['version-update:semver-major']
+      - dependency-name: '@types/react*'
+        update-types: ['version-update:semver-major']
   - package-ecosystem: github-actions
     directory: /
     schedule:
